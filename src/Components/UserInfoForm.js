@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
-
-const UserInfoForm = ({ onSubmit, onReset }) => {
+const UserInfoForm = ({ onSubmit }) => {
   const [name, setName] = useState('');
   const [major, setMajor] = useState('');
   const [year, setYear] = useState('');
@@ -9,11 +9,20 @@ const UserInfoForm = ({ onSubmit, onReset }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ name, major, year, degree });
+
+    const user = {
+      name,
+      major,
+      year,
+      degree,
+      id: uuidv4(),
+    };
+
+    onSubmit(user); 
   };
 
   return (
-    <div className="userinfo-form"> {}
+    <div className="userinfo-form">
       <form onSubmit={handleSubmit}>
         <h2>Enter Your Info</h2>
         <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required />

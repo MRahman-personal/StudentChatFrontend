@@ -1,32 +1,41 @@
 import React, { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import Notifications from './Notifications'; 
 
-const ChatRoom = ({ userInfo, onReset }) => {
+const ChatRoom = ({ userInfo, chatMessages, setChatMessages, onSendMessage, handleRefresh, handleLike, onReset, users }) => {
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([
-    { user: 'Alice', text: 'Hey everyone! Looking forward to this course!', likes: 0 },
-    { user: 'Bob', text: 'Has anyone started the assignment yet?', likes: 0 },
-    { user: 'Charlie', text: 'I found some great resources for the project.', likes: 0 },
-    { user: 'Diana', text: 'Let’s form a study group!', likes: 0 },
-  ]);
   const [showPopup, setShowPopup] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [notifications, setNotifications] = useState([
+    { id: 1, message: "Your message was liked by John" },
+    { id: 2, message: "Alice has joined the chat" },
+    { id: 3, message: "Your message has been pinned by the admin" },
+    { id: 4, message: "New message from Bob" },
+    { id: 5, message: "System maintenance scheduled for tonight" }
+  ]);
 
   const handleSendMessage = (e) => {
     e.preventDefault();
+
     if (message.trim()) {
-      setMessages([...messages, { user: userInfo.name, text: message, likes: 0 }]);
+      const newMessage = {
+        userId: userInfo.id,
+        message: message.trim(),
+        timestamp: new Date().toISOString(),
+        likes: 0,
+        id: uuidv4(),
+      };
+      onSendMessage(newMessage);
       setMessage('');
     }
   };
 
-  const handleLikeMessage = (index) => {
-    const newMessages = [...messages];
-    newMessages[index].likes += 1; 
-    setMessages(newMessages);
+  const handleLikeMessage = async (id) => {
+    handleLike(id);
   };
 
-  const handleMemberClick = (member) => {
-    setSelectedUser(member);
+  const handleMemberClick = (user) => {
+    setSelectedUser(user);
     setShowPopup(true);
   };
 
@@ -35,26 +44,32 @@ const ChatRoom = ({ userInfo, onReset }) => {
     setSelectedUser(null);
   };
 
+  const handleRefreshChatroom = async () => {
+    handleRefresh();
+  };
+
   return (
     <div className="chatroom">
-      
       <div className="sidebar">
         <h3>Members</h3>
-        {['Alice', 'Bob', 'Charlie', 'Diana'].map((member) => (
-          <div key={member} onClick={() => handleMemberClick(member)}>
-            {member}
-          </div>
-        ))}
+        {users && users.length > 0 ? (
+          users.map((user) => (
+            <div key={user.id} onClick={() => handleMemberClick(user)}>
+              {user.name}
+            </div>
+          ))
+        ) : (
+          <p>No members available</p>
+        )}
       </div>
       <div className="chatbox">
-        
         <div className="message-list">
-          {messages.map((msg, index) => (
-            <div key={index} className="message">
+          {chatMessages.map((msg) => (
+            <div key={msg.id} className="message">
               <strong>{msg.user}: </strong>
               {msg.text}
               <div>
-                <button onClick={() => handleLikeMessage(index)}>Like</button>
+                <button onClick={() => handleLikeMessage(msg.id)}>Like</button>
                 <span>{msg.likes} {msg.likes === 1 ? 'like' : 'likes'}</span>
               </div>
             </div>
@@ -70,20 +85,10 @@ const ChatRoom = ({ userInfo, onReset }) => {
             className="message-input"
           />
           <button type="submit" className="send-button">Send</button>
+          <button type="button" onClick={handleRefreshChatroom} className="refresh-button">Refresh Chat</button>
         </form>
       </div>
-
-      {showPopup && (
-        <div className="popup-overlay">
-          <div className="popup">
-            <h2>{selectedUser}</h2>
-            <p>Major: Computer Science</p>
-            <p>Year: Senior</p>
-            <p>Degree: BS</p>
-            <button onClick={handleClosePopup}>Close</button>
-          </div>
-        </div>
-      )}
+      <Notifications data={notifications}/> 
     </div>
   );
 };
