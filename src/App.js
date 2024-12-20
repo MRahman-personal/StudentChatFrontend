@@ -21,14 +21,7 @@ const App = () => {
   }, []);
 
   const fetchChatMessages = async () => {
-    try {
-      const response = await fetch(`https://studentchat-chatservice-d3f5bhd7bqbgfkhd.eastus-01.azurewebsites.net/api/chat/messages`);
-      if (!response.ok) throw new Error('Failed to fetch chat messages');
-      const messages = await response.json();
-      setChatMessages(messages);
-    } catch (error) {
-      console.error(error);
-    }
+    handleRefresh()
   };
 
   const fetchUsers = async () => {
