@@ -8,6 +8,7 @@ const App = () => {
   const [chatMessages, setChatMessages] = useState([]);
   const [users, setUsers] = useState([]);
   const [isUserInfoSubmitted, setIsUserInfoSubmitted] = useState(false);
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const cachedInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -41,10 +42,24 @@ const App = () => {
     }
   };
 
-  const handleUserInfoSubmit = (info) => {
+  const handleUserInfoSubmit = async (info) => {
     setUserInfo(info);
     localStorage.setItem('userInfo', JSON.stringify(info));
-    setIsUserInfoSubmitted(true);
+
+    try {
+      const response = await fetch(`https://studentchat-userservice-c7a8h5guhacxf3bv.eastus-01.azurewebsites.net/api/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(info),
+      });
+
+      if (!response.ok) throw new Error('Failed to create user');
+      setIsUserInfoSubmitted(true);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleReset = () => {
@@ -78,15 +93,15 @@ const App = () => {
 
   const handleRefresh = async () => {
     try {
-      const chatResponse = await fetch('https://your-backend-url/api/chat/messages');
+      const chatResponse = await fetch('https://studentchat-chatservice-d3f5bhd7bqbgfkhd.eastus-01.azurewebsites.net/api/chat/messages');
       if (!chatResponse.ok) throw new Error('Failed to refresh chat messages');
       const newMessages = await chatResponse.json();
       setChatMessages(newMessages);
 
-      //const notificationsResponse = await fetch('url/api/notifications');
-      //if (!notificationsResponse.ok) throw new Error('Failed to refresh notifications');
-      //const notifications = await notificationsResponse.json();
-      // setNotifications(notifications);
+      const notificationsResponse = await fetch(`https://studentchat-chatservice-d3f5bhd7bqbgfkhd.eastus-01.azurewebsites.net/api/chat/messages/${userInfo.id}`);
+      if (!notificationsResponse.ok) throw new Error('Failed to refresh notifications');
+      const notifications = await notificationsResponse.json();
+      setNotifications(notifications);
     } catch (error) {
       console.error(error);
     }
@@ -141,6 +156,7 @@ const App = () => {
             onReset={handleReset}
             handleLike={handleLikeMessage}
             handleRefresh={handleRefresh}
+            notifications={notifications}
           />
           <div className="button-container">
             <button onClick={handleReset} className="reset-button">End chat</button>

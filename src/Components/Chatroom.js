@@ -2,17 +2,11 @@ import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import Notifications from './Notifications'; 
 
-const ChatRoom = ({ userInfo, chatMessages, setChatMessages, onSendMessage, handleRefresh, handleLike, onReset, users }) => {
+const ChatRoom = ({ userInfo, chatMessages, setChatMessages, onSendMessage, handleRefresh, handleLike, onReset, users, notifications }) => {
   const [message, setMessage] = useState('');
   const [showPopup, setShowPopup] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: "Your message was liked by John" },
-    { id: 2, message: "Alice has joined the chat" },
-    { id: 3, message: "Your message has been pinned by the admin" },
-    { id: 4, message: "New message from Bob" },
-    { id: 5, message: "System maintenance scheduled for tonight" }
-  ]);
+  
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -85,7 +79,6 @@ const ChatRoom = ({ userInfo, chatMessages, setChatMessages, onSendMessage, hand
             className="message-input"
           />
           <button type="submit" className="send-button">Send</button>
-          <button type="button" onClick={handleRefreshChatroom} className="refresh-button">Refresh Chat</button>
         </form>
       </div>
       <Notifications data={notifications}/> 
