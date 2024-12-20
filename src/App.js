@@ -98,10 +98,16 @@ const App = () => {
       const newMessages = await chatResponse.json();
       setChatMessages(newMessages);
 
-      const notificationsResponse = await fetch(`https://studentchat-chatservice-d3f5bhd7bqbgfkhd.eastus-01.azurewebsites.net/api/chat/messages/${userInfo.id}`);
+      const notificationsResponse = await fetch(`https://studentchat-chatservice-d3f5bhd7bqbgfkhd.eastus-01.azurewebsites.net/api/chat/notifications/${userInfo.id}`);
       if (!notificationsResponse.ok) throw new Error('Failed to refresh notifications');
       const notifications = await notificationsResponse.json();
-      setNotifications(notifications);
+
+      const transformedNotifications = notifications.map((notification, index) => ({
+        id: `notif-${index}`,
+        message: notification, 
+      }));
+      setNotifications(transformedNotifications);
+
     } catch (error) {
       console.error(error);
     }
@@ -160,7 +166,7 @@ const App = () => {
           />
           <div className="button-container">
             <button onClick={handleReset} className="reset-button">End chat</button>
-            <button onClick={fetchChatMessages} className="refresh-button">Refresh Chat</button>
+            <button onClick={handleRefresh} className="refresh-button">Refresh Chat</button>
           </div>
         </div>
       )}
